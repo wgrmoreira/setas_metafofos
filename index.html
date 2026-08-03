@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SETAS META FOFOS</title>
+    <title>JOGO DAS SETAS</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
 
@@ -45,6 +45,14 @@
             padding: 20px;
         }
 
+        #start-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateY(-6vh);
+            width: 100%;
+        }
+
         #start-screen h1 {
             font-family: 'Fredoka One', cursive;
             font-size: 52px;
@@ -80,7 +88,7 @@
             background: rgba(255, 255, 255, 0.85);
             padding: 20px 40px;
             border-radius: 25px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             box-shadow: 0 8px 15px rgba(0,0,0,0.05);
             backdrop-filter: blur(5px);
             display: flex;
@@ -144,15 +152,48 @@
             box-shadow: 0 0 0 var(--btn-hover), 0 5px 5px rgba(0,0,0,0.1);
         }
         
+        #donate-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #059669;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-top: 20px;
+        }
+
+        #donate-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0 0 #059669;
+        }
+
+        #donation-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 60;
+            padding: 20px;
+            text-align: center;
+        }
+        
         .dev-credits {
             position: absolute;
-            top: 15px; /* Modificado: movido para o topo */
-            font-size: 10px; /* Modificado: tamanho bem pequeno */
+            top: 15px; 
+            font-size: 10px; 
             color: #64748b;
-            font-weight: 700; /* Modificado: peso da fonte um pouco mais leve */
+            font-weight: 700; 
             letter-spacing: 1px;
             text-transform: uppercase;
-            opacity: 0.5; /* Modificado: mais transparente/discreto */
+            opacity: 0.5; 
         }
 
         /* --- JOGO --- */
@@ -263,7 +304,6 @@
             box-sizing: border-box;
         }
 
-        /* Modificado: Adicionada borda, cor de fundo leve e animações ao tabuleiro */
         #board {
             width: 100%;
             max-width: 450px;
@@ -372,14 +412,13 @@
         
         #gameover-message { 
             border: 3px solid var(--error-color); 
-            pointer-events: auto; /* Para permitir clique no botão continuar */
+            pointer-events: auto;
         }
         #gameover-message .modal-title { font-size: 32px; color: var(--error-color); }
         
         #feedback-message { border: 3px solid var(--error-color); }
         #feedback-message .modal-title { font-size: 26px; color: var(--error-color); }
 
-        /* Botão continuar e animacoes do resumo */
         #summary-continue-btn {
             background-color: var(--btn-bg);
             color: white;
@@ -411,18 +450,33 @@
     <!-- TELA INICIAL -->
     <div id="start-screen">
         <div class="dev-credits">Dev - Wgrmoreira</div>
-        <h1>
-            <span class="logo-icon">✨</span><br>
-            SETAS<br>META FOFOS<br>
-            <span class="logo-icon" style="animation-delay: 1s;">🧩</span>
-        </h1>
-        <div class="record-box">
-            <h2>Recorde Atual</h2>
-            <p id="high-score-display">0</p>
-            <p id="record-time-display">⏳ Tempo Acumulado: 0.00s</p>
-            <div id="start-trophy-case"></div>
+        <div id="start-wrapper">
+            <h1>
+                <span class="logo-icon">✨</span><br>
+                JOGO<br>DAS SETAS<br>
+                <span class="logo-icon" style="animation-delay: 1s;">⬆️</span>
+            </h1>
+            <div class="record-box">
+                <h2>Recorde Atual</h2>
+                <p id="high-score-display">0</p>
+                <p id="record-time-display">⏳ Tempo Acumulado: 0.00s</p>
+                <div id="start-trophy-case"></div>
+            </div>
+            <button id="start-btn">JOGAR!</button>
+            <button id="donate-btn">💖 APOIAR DEV</button>
         </div>
-        <button id="start-btn">JOGAR!</button>
+
+        <!-- TELA DE DOAÇÃO -->
+        <div id="donation-screen">
+            <h2 style="font-family: 'Fredoka One', cursive; font-size: 32px; color: #334155; margin-bottom: 10px;">Apoie o Jogo! 💖</h2>
+            <p style="color: #64748b; font-weight: 900; margin-bottom: 20px; font-size: 16px;">Sua doação ajuda a manter o jogo vivo, sem anúncios e cheio de novidades. Muito obrigado pelo carinho!</p>
+            <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; width: 80%; max-width: 250px;">
+                <!-- O QR Code abaixo é perfeitamente válido com o Payload EMVCo Pix -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126330014br.gov.bcb.pix0111044311047635204000053039865802BR5910Wgrmoreira6006Brasil62070503%2A%2A%2A63041F63" alt="QR Code Pix" style="border-radius: 10px; margin-bottom: 15px; width: 150px; height: 150px;">
+                <button id="copy-pix-btn" style="background-color: #3b82f6; color: white; border: none; padding: 10px 20px; font-size: 16px; font-family: 'Fredoka One', cursive; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; width: 100%; transition: background-color 0.2s, box-shadow 0.2s;">Copiar Código Pix</button>
+            </div>
+            <button id="close-donation-btn" style="background-color: #ef4444; color: white; border: none; padding: 15px 40px; font-size: 18px; font-family: 'Fredoka One', cursive; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #b91c1c; margin-top: 30px; transition: transform 0.1s, box-shadow 0.1s;">VOLTAR</button>
+        </div>
     </div>
 
     <!-- ENVOLVRO DO JOGO -->
@@ -587,11 +641,16 @@
 
             // --- ELEMENTOS DA UI ---
             const startScreen = document.getElementById('start-screen');
+            const startWrapper = document.getElementById('start-wrapper');
             const gameWrapper = document.getElementById('game-wrapper');
             const highScoreDisplay = document.getElementById('high-score-display');
             const recordTimeDisplay = document.getElementById('record-time-display');
             const startTrophyCase = document.getElementById('start-trophy-case');
             const startBtn = document.getElementById('start-btn');
+            const donateBtn = document.getElementById('donate-btn');
+            const donationScreen = document.getElementById('donation-screen');
+            const closeDonationBtn = document.getElementById('close-donation-btn');
+            const copyPixBtn = document.getElementById('copy-pix-btn');
             
             const boardEl = document.getElementById('board');
             const levelDisplay = document.getElementById('level-display');
@@ -639,6 +698,40 @@
             let accumulatedTimeMs = 0;
             let highestAccTimeMs = 0;
             let isNewRecord = false;
+
+            // --- FUNÇÕES DA TELA DE DOAÇÃO ---
+            if(donateBtn) {
+                donateBtn.addEventListener('click', () => {
+                    try { initAudio(); playTone('pop'); } catch(e) {}
+                    startWrapper.style.display = 'none';
+                    donationScreen.style.display = 'flex';
+                });
+            }
+
+            if(closeDonationBtn) {
+                closeDonationBtn.addEventListener('click', () => {
+                    try { playTone('pop'); } catch(e) {}
+                    donationScreen.style.display = 'none';
+                    startWrapper.style.display = 'flex';
+                });
+            }
+
+            if(copyPixBtn) {
+                copyPixBtn.addEventListener('click', () => {
+                    // String oficial "Pix Copia e Cola" gerada no padrão Banco Central EMVCo
+                    const pixCopiaECola = "00020126330014br.gov.bcb.pix0111044311047635204000053039865802BR5910Wgrmoreira6006Brasil62070503***63041F63";
+                    navigator.clipboard.writeText(pixCopiaECola).then(() => {
+                        copyPixBtn.innerText = 'Copiado! ✅';
+                        copyPixBtn.style.backgroundColor = '#10b981';
+                        copyPixBtn.style.boxShadow = '0 4px 0 #059669';
+                        setTimeout(() => {
+                            copyPixBtn.innerText = 'Copiar Código Pix';
+                            copyPixBtn.style.backgroundColor = '#3b82f6';
+                            copyPixBtn.style.boxShadow = '0 4px 0 #2563eb';
+                        }, 2000);
+                    });
+                });
+            }
 
             // --- CARREGAMENTO BLINDADO ---
             function loadProgress() {
