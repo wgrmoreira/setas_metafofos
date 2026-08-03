@@ -152,6 +152,7 @@
             box-shadow: 0 0 0 var(--btn-hover), 0 5px 5px rgba(0,0,0,0.1);
         }
         
+        /* Botão Doação */
         #donate-btn {
             background-color: #10b981;
             color: white;
@@ -171,6 +172,7 @@
             box-shadow: 0 0 0 #059669;
         }
 
+        /* Tela de Doação */
         #donation-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -453,8 +455,7 @@
         <div id="start-wrapper">
             <h1>
                 <span class="logo-icon">✨</span><br>
-                JOGO<br>DAS SETAS<br>
-                <span class="logo-icon" style="animation-delay: 1s;">⬆️</span>
+                JOGO<br>DAS SETAS
             </h1>
             <div class="record-box">
                 <h2>Recorde Atual</h2>
@@ -471,7 +472,6 @@
             <h2 style="font-family: 'Fredoka One', cursive; font-size: 32px; color: #334155; margin-bottom: 10px;">Apoie o Jogo! 💖</h2>
             <p style="color: #64748b; font-weight: 900; margin-bottom: 20px; font-size: 16px;">Sua doação ajuda a manter o jogo vivo, sem anúncios e cheio de novidades. Muito obrigado pelo carinho!</p>
             <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; width: 80%; max-width: 250px;">
-                <!-- O QR Code abaixo é perfeitamente válido com o Payload EMVCo Pix -->
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126330014br.gov.bcb.pix0111044311047635204000053039865802BR5910Wgrmoreira6006Brasil62070503%2A%2A%2A63041F63" alt="QR Code Pix" style="border-radius: 10px; margin-bottom: 15px; width: 150px; height: 150px;">
                 <button id="copy-pix-btn" style="background-color: #3b82f6; color: white; border: none; padding: 10px 20px; font-size: 16px; font-family: 'Fredoka One', cursive; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; width: 100%; transition: background-color 0.2s, box-shadow 0.2s;">Copiar Código Pix</button>
             </div>
@@ -718,7 +718,6 @@
 
             if(copyPixBtn) {
                 copyPixBtn.addEventListener('click', () => {
-                    // String oficial "Pix Copia e Cola" gerada no padrão Banco Central EMVCo
                     const pixCopiaECola = "00020126330014br.gov.bcb.pix0111044311047635204000053039865802BR5910Wgrmoreira6006Brasil62070503***63041F63";
                     navigator.clipboard.writeText(pixCopiaECola).then(() => {
                         copyPixBtn.innerText = 'Copiado! ✅';
