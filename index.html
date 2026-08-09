@@ -285,6 +285,36 @@
             background-color: #10b981; 
             transition: width 0.1s linear, background-color 0.3s;
         }
+        
+        /* LINHA DE NOTAS (MELODIA) */
+        #melody-sheet {
+            width: 100%;
+            max-width: 450px;
+            height: 45px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            gap: 5px;
+            padding: 5px 15px;
+            box-sizing: border-box;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border-bottom: 2px dashed rgba(0,0,0,0.05);
+            scroll-behavior: smooth;
+        }
+
+        .melody-note {
+            width: 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 0px rgba(0,0,0,0.15);
+            animation: popInNote 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            flex-shrink: 0; /* Previne que as notas amassem */
+        }
+        
+        @keyframes popInNote {
+            0% { transform: scale(0) translateY(10px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
 
         .pop { transform: scale(1.4); color: #10b981 !important; }
         .pop-error { transform: scale(1.4); color: var(--error-color) !important; }
@@ -302,7 +332,7 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            padding: 15px;
+            padding: 10px 15px 15px 15px; /* Reduzido padding superior por causa do melody-sheet */
             box-sizing: border-box;
         }
 
@@ -316,7 +346,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.03);
             box-sizing: border-box;
-            transition: border-color 0.1s;
+            transition: border-color 0.1s, background-color 0.1s, box-shadow 0.1s;
         }
 
         .flash-green {
@@ -455,7 +485,7 @@
         <div id="start-wrapper">
             <h1>
                 <span class="logo-icon">✨</span><br>
-                JOGO<br>DAS SETAS
+                JOGO<br>DAS SETAS<br>
             </h1>
             <div class="record-box">
                 <h2>Recorde Atual</h2>
@@ -507,6 +537,9 @@
         <div id="progress-container">
             <div id="progress-bar"></div>
         </div>
+
+        <!-- NOVO: VISOR DE PARTITURA MUSICAL (NOTAS) -->
+        <div id="melody-sheet"></div>
 
         <div id="game-container">
             <div id="board"></div>
@@ -564,7 +597,7 @@
                 }
             }
 
-            function playTone(type) {
+            function playTone(type, colorIndex = 0, length = 1) {
                 try {
                     if (!audioCtx) return;
                     const osc = audioCtx.createOscillator();
@@ -574,14 +607,34 @@
                     
                     let now = audioCtx.currentTime;
                     
-                    if (type === 'pop') {
+                    if (type === 'melodic') {
+                        const diatonicScale = [
+                            261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88,
+                            523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77
+                        ];
+                        
+                        let baseFreq = diatonicScale[colorIndex % diatonicScale.length];
+                        let freq = baseFreq;
+                        let duration = 0.4;
+                        
+                        if (length === 1) {
+                            freq *= 2; 
+                            duration = 0.3; 
+                        } else if (length === 3) {
+                            freq /= 2; 
+                            duration = 0.6; 
+                        }
+
                         osc.type = 'sine';
-                        osc.frequency.setValueAtTime(700, now);
-                        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
-                        gain.gain.setValueAtTime(0.3, now);
-                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        osc.frequency.setValueAtTime(freq, now);
+                        
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.4, now + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                        
                         osc.start(now);
-                        osc.stop(now + 0.1);
+                        osc.stop(now + duration);
+                        
                     } else if (type === 'error') {
                         osc.type = 'sawtooth';
                         osc.frequency.setValueAtTime(180, now);
@@ -599,15 +652,27 @@
                         osc.start(now);
                         osc.stop(now + 0.4);
                     } else if (type === 'win') {
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(523.25, now);
-                        osc.frequency.setValueAtTime(659.25, now + 0.1);
-                        osc.frequency.setValueAtTime(783.99, now + 0.2);
-                        osc.frequency.setValueAtTime(1046.50, now + 0.3);
-                        gain.gain.setValueAtTime(0.2, now);
-                        gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
-                        osc.start(now);
-                        osc.stop(now + 0.5);
+                        // Modificado: Agora toca 7 notas lentas e dramáticas para o final
+                        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00]; 
+                        notes.forEach((freq, i) => {
+                            let oscNote = audioCtx.createOscillator();
+                            let gainNote = audioCtx.createGain();
+                            oscNote.connect(gainNote);
+                            gainNote.connect(audioCtx.destination);
+                            oscNote.type = 'sine';
+                            
+                            let startTime = now + (i * 0.25); // 0.25s entre notas (mais lento)
+                            let duration = (i === notes.length - 1) ? 1.5 : 0.3; // A última nota ecoa bastante
+                            
+                            oscNote.frequency.setValueAtTime(freq, startTime);
+                            
+                            gainNote.gain.setValueAtTime(0, startTime);
+                            gainNote.gain.linearRampToValueAtTime(0.25, startTime + 0.05);
+                            gainNote.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                            
+                            oscNote.start(startTime);
+                            oscNote.stop(startTime + duration);
+                        });
                     } else if (type === 'start') {
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(440, now); 
@@ -653,6 +718,7 @@
             const copyPixBtn = document.getElementById('copy-pix-btn');
             
             const boardEl = document.getElementById('board');
+            const melodySheet = document.getElementById('melody-sheet');
             const levelDisplay = document.getElementById('level-display');
             const scoreDisplay = document.getElementById('score-display');
             const livesDisplay = document.getElementById('lives-display');
@@ -702,7 +768,7 @@
             // --- FUNÇÕES DA TELA DE DOAÇÃO ---
             if(donateBtn) {
                 donateBtn.addEventListener('click', () => {
-                    try { initAudio(); playTone('pop'); } catch(e) {}
+                    try { initAudio(); playTone('melodic', 1, 1); } catch(e) {}
                     startWrapper.style.display = 'none';
                     donationScreen.style.display = 'flex';
                 });
@@ -710,7 +776,7 @@
 
             if(closeDonationBtn) {
                 closeDonationBtn.addEventListener('click', () => {
-                    try { playTone('pop'); } catch(e) {}
+                    try { playTone('melodic', 3, 2); } catch(e) {}
                     donationScreen.style.display = 'none';
                     startWrapper.style.display = 'flex';
                 });
@@ -1121,6 +1187,9 @@
                 isGameActive = true;
                 updateUI();
                 
+                // Limpa a partitura visual de notas musicais a cada nova fase
+                if(melodySheet) melodySheet.innerHTML = '';
+                
                 if (mode !== 'RETRY' || !currentBoardLayout) {
                     let targetPieces = Math.min(currentLevel + 3, 20); 
                     currentBoardLayout = generateExactPuzzle(targetPieces);
@@ -1170,11 +1239,29 @@
                 if (!blocksData.some(b => b.id === block.id)) return; 
 
                 if (isFree(block, logicalBoard, gridSize)) {
-                    playTone('pop');
+                    
+                    let colorIdx = COLORS.indexOf(block.color);
+                    if (colorIdx === -1) colorIdx = 0;
+                    playTone('melodic', colorIdx, block.len);
                     
                     boardEl.classList.remove('flash-green', 'flash-red');
                     void boardEl.offsetWidth;
                     boardEl.classList.add('flash-green');
+                    
+                    // Adiciona a notinha na partitura visual
+                    if(melodySheet) {
+                        const noteEl = document.createElement('div');
+                        noteEl.className = 'melody-note';
+                        noteEl.style.backgroundColor = block.color;
+                        
+                        let noteHeight = 15;
+                        if (block.len === 2) noteHeight = 25;
+                        if (block.len === 3) noteHeight = 35;
+                        noteEl.style.height = noteHeight + 'px';
+                        
+                        melodySheet.appendChild(noteEl);
+                        melodySheet.scrollLeft = melodySheet.scrollWidth;
+                    }
                     
                     for(let y=block.y; y<block.y+block.h; y++) {
                         for(let x=block.x; x<block.x+block.w; x++) {
@@ -1237,7 +1324,11 @@
             function handleVictory() {
                 isGameActive = false;
                 stopTimer();
-                playTone('win');
+                
+                // Toca a vinheta de 7 notas exclusivas, mais lenta e longa, após 1 segundo de atraso
+                setTimeout(() => {
+                    playTone('win');
+                }, 1000);
                 
                 accumulatedTimeMs += timeLeft;
                 let currentBonusStars = Math.floor(accumulatedTimeMs / 2000);
