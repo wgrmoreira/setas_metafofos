@@ -609,24 +609,23 @@
                     
                     // ESCALA PENTATÔNICA: Garante que TODAS as combinações de cores soem perfeitamente harmônicas.
                     const pentatonicScale = [
-                        261.63, 293.66, 329.63, 392.00, 440.00, // C4, D4, E4, G4, A4
-                        523.25, 587.33, 659.25, 783.99, 880.00, // C5, D5, E5, G5, A5
-                        1046.50, 1174.66, 1318.51, 1567.98      // C6, D6, E6, G6
+                        329.63, 392.00, 440.00, 523.25, 587.33, // E4, G4, A4, C5, D5
+                        659.25, 783.99, 880.00, 1046.50, 1174.66 // E5, G5, A5, C6, D6
                     ];
                     
-                    if (type === 'melodic') {
-                        let baseFreq = pentatonicScale[param1 % pentatonicScale.length];
-                        let freq = baseFreq;
+                    const getFreq = (colorIdx, length) => {
+                        let baseIdx = colorIdx % 5;
+                        let idx = baseIdx;
                         let duration = 0.4;
+                        if (length === 1) { idx += 5; duration = 0.25; }
+                        else if (length === 2) { idx += 2; duration = 0.4; }
+                        else if (length === 3) { idx += 0; duration = 0.6; }
+                        return { freq: pentatonicScale[idx], duration: duration };
+                    };
+                    
+                    if (type === 'melodic') {
+                        let { freq, duration } = getFreq(param1, param2);
                         
-                        if (param2 === 1) {
-                            freq *= 2; 
-                            duration = 0.3; 
-                        } else if (param2 === 3) {
-                            freq /= 2; 
-                            duration = 0.6; 
-                        }
-
                         osc.type = 'sine'; 
                         osc.frequency.setValueAtTime(freq, now);
                         
@@ -654,11 +653,10 @@
                         osc.start(now);
                         osc.stop(now + 0.4);
                     } else if (type === 'win') {
-                        // Reproduz as últimas 4 notas harmônicas salvas
+                        // Reproduz as últimas 7 notas harmônicas salvas, ou um padrão
                         let notesToPlay = param1 || [];
                         if (notesToPlay.length === 0) {
-                            // Failsafe caso chegue vazio
-                            notesToPlay = [{colorIdx: 5, len: 2}, {colorIdx: 7, len: 2}, {colorIdx: 8, len: 2}, {colorIdx: 10, len: 2}];
+                            notesToPlay = [{colorIdx: 0, len: 3}, {colorIdx: 1, len: 2}, {colorIdx: 2, len: 2}, {colorIdx: 3, len: 1}, {colorIdx: 4, len: 1}, {colorIdx: 5, len: 1}, {colorIdx: 6, len: 1}];
                         }
                         
                         notesToPlay.forEach((noteData, i) => {
@@ -668,13 +666,10 @@
                             gainNote.connect(audioCtx.destination);
                             oscNote.type = 'sine';
                             
-                            let baseFreq = pentatonicScale[noteData.colorIdx % pentatonicScale.length];
-                            let freq = baseFreq;
-                            if (noteData.len === 1) freq *= 2;
-                            else if (noteData.len === 3) freq /= 2;
+                            let { freq } = getFreq(noteData.colorIdx, noteData.len);
                             
-                            let startTime = now + (i * 0.35); // Cadência mais lenta e marcante
-                            let duration = (i === notesToPlay.length - 1) ? 2.5 : 0.5; // Última nota ecoa bastante
+                            let startTime = now + (i * 0.45); // Cadência mais lenta
+                            let duration = (i === notesToPlay.length - 1) ? 3.0 : 0.6; // Última nota ecoa
                             
                             oscNote.frequency.setValueAtTime(freq, startTime);
                             
@@ -1259,9 +1254,9 @@
                     if (colorIdx === -1) colorIdx = 0;
                     playTone('melodic', colorIdx, block.len);
                     
-                    // Salva a nota no array e mantém apenas as 4 últimas
+                    // Salva a nota no array e mantém apenas as últimas 7
                     lastPlayedNotes.push({ colorIdx: colorIdx, len: block.len });
-                    if (lastPlayedNotes.length > 4) {
+                    if (lastPlayedNotes.length > 7) {
                         lastPlayedNotes.shift();
                     }
                     
@@ -1345,7 +1340,7 @@
                 isGameActive = false;
                 stopTimer();
                 
-                // NOVO: Usa a memória das últimas 4 notas harmônicas exatas tocadas na fase
+                // NOVO: Usa a memória das últimas 7 notas harmônicas exatas tocadas na fase
                 setTimeout(() => {
                     playTone('win', lastPlayedNotes);
                 }, 1000);
@@ -1412,4 +1407,3 @@
     </script>
 </body>
 </html>
-}}Não consigo te ajudar com isso. Sou só um modelo de linguagem e não tenho capacidade de entender e responder a essa questão.
