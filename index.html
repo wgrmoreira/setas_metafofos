@@ -68,15 +68,19 @@
             display: flex;
             gap: 5px;
             margin-bottom: 10px;
-            font-size: 50px;
             transform: skewX(-15deg);
         }
 
-        .logo-arrows span {
-            display: inline-block;
+        .logo-arrows svg {
+            width: 45px;
+            height: 45px;
             filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.5));
             animation: pulse-glow 2s infinite alternate;
         }
+
+        .logo-arrows svg:nth-child(1) { fill: #3b82f6; animation-delay: 0s; }
+        .logo-arrows svg:nth-child(2) { fill: #f59e0b; animation-delay: 0.3s; }
+        .logo-arrows svg:nth-child(3) { fill: #ef4444; animation-delay: 0.6s; }
 
         @keyframes pulse-glow {
             from { filter: drop-shadow(0 0 2px currentColor); }
@@ -319,7 +323,7 @@
         .melody-note {
             width: 12px;
             border-radius: 4px;
-            box-shadow: 0 0 8px currentColor; /* Glow effect na partitura */
+            box-shadow: 0 0 8px currentColor;
             animation: popInNote 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             flex-shrink: 0; 
         }
@@ -328,6 +332,9 @@
             0% { transform: scale(0) translateY(10px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
+
+        .pop { transform: scale(1.4); color: #10b981 !important; }
+        .pop-error { transform: scale(1.4); color: var(--error-color) !important; }
 
         #game-wrapper {
             display: none; 
@@ -356,7 +363,7 @@
             border: 2px solid var(--board-border);
             background-color: #1a1a1a;
             box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden; /* Mantém os feixes de luz dentro */
+            overflow: hidden; 
         }
 
         #lines-container {
@@ -384,13 +391,13 @@
             height: 100%;
             position: absolute;
             inset: 0;
-            z-index: 2; /* Fica acima das linhas */
+            z-index: 2; 
         }
 
         /* EFEITO DOS BLOCOS */
         .block {
             position: absolute;
-            border-radius: 8px; /* Mais retangular moderno */
+            border-radius: 8px; 
             box-sizing: border-box;
             display: flex;
             justify-content: center;
@@ -451,13 +458,12 @@
             100% { box-shadow: inset 0 0 30px rgba(0,0,0,0.8); border-color: var(--board-border); }
         }
         
-        /* Rastro (Trail) do bloco */
+        /* Rastro do bloco */
         .ghost-trail {
-            position: fixed;
+            position: absolute; /* Modificado para se alinhar com o parent #board */
             border-radius: 8px;
             pointer-events: none;
-            z-index: 99;
-            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            will-change: opacity, transform;
         }
 
         /* --- MODAIS DE FIM DE JOGO --- */
@@ -523,12 +529,13 @@
 
     <!-- TELA INICIAL -->
     <div id="start-screen">
+        <div class="dev-credits">DEV WGRMOREIRA</div>
         <div id="start-wrapper">
             <div class="logo-container">
                 <div class="logo-arrows">
-                    <span style="color: #3b82f6;">&#11165;</span>
-                    <span style="color: #f59e0b;">&#11165;</span>
-                    <span style="color: #ef4444;">&#11165;</span>
+                    <svg viewBox="0 0 24 24"><path d="M12 4 l8 8 h-6 v8 h-4 v-8 h-6 z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 4 l8 8 h-6 v8 h-4 v-8 h-6 z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 4 l8 8 h-6 v8 h-4 v-8 h-6 z"/></svg>
                 </div>
                 <h1 class="logo-text"><span class="font-thin">JOGO</span> <span class="font-bold">DAS SETAS</span></h1>
                 <div class="start-subtitle">Versão Minimalista</div>
@@ -546,7 +553,6 @@
                 <button id="donate-btn" class="modern-btn btn-donate">APOIAR DEV</button>
             </div>
         </div>
-        <div class="dev-credits">DEV WGRMOREIRA</div>
     </div>
 
     <!-- TELA DE DOAÇÃO -->
@@ -629,7 +635,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- GERENCIAMENTO DE ÁUDIO ---
             let audioCtx = null;
 
             function initAudio() {
@@ -653,8 +658,8 @@
                     
                     // ESCALA PENTATÔNICA MAIOR
                     const pentatonicScale = [
-                        329.63, 392.00, 440.00, 523.25, 587.33, // E4, G4, A4, C5, D5
-                        659.25, 783.99, 880.00, 1046.50, 1174.66 // E5, G5, A5, C6, D6
+                        329.63, 392.00, 440.00, 523.25, 587.33, 
+                        659.25, 783.99, 880.00, 1046.50, 1174.66 
                     ];
                     
                     const getFreq = (colorIdx, length) => {
@@ -747,14 +752,12 @@
                 } catch(e) { } 
             }
 
-            // --- PALETA DE CORES VIBRANTES PARA DARK MODE ---
             const COLORS = [
                 '#ff3366', '#ffb627', '#2ec4b6', '#3b82f6', '#8b5cf6',
                 '#f97316', '#14b8a6', '#ef4444', '#ec4899', '#0ea5e9', 
                 '#6366f1', '#d946ef', '#f43f5e', '#10b981'
             ];
 
-            // --- ELEMENTOS DA UI ---
             const startScreen = document.getElementById('start-screen');
             const startWrapper = document.getElementById('start-wrapper');
             const gameWrapper = document.getElementById('game-wrapper');
@@ -794,7 +797,6 @@
             const DIRS = { 'U': {x:0, y:-1}, 'D': {x:0, y:1}, 'L': {x:-1, y:0}, 'R': {x:1, y:0} };
             const DIR_KEYS = Object.keys(DIRS);
 
-            // --- ESTADO DO JOGO ---
             let currentLevel = 1;
             let highestLevel = 1; 
             let score = 0;
@@ -818,10 +820,8 @@
             let isNewRecord = false;
             let lastPlayedNotes = [];
 
-            // --- BACKGROUND ANIMATION ---
             function createGlowLines() {
                 linesContainer.innerHTML = '';
-                // Cria 6 linhas verticais e 6 horizontais
                 for(let i=0; i<6; i++) {
                     let vLine = document.createElement('div');
                     vLine.className = 'glow-beam beam-v';
@@ -839,7 +839,6 @@
                 }
             }
 
-            // --- FUNÇÕES DA TELA DE DOAÇÃO ---
             if(donateBtn) {
                 donateBtn.addEventListener('click', () => {
                     try { initAudio(); playTone('melodic', 1, 1); } catch(e) {}
@@ -872,7 +871,6 @@
                 });
             }
 
-            // --- CARREGAMENTO ---
             function loadProgress() {
                 try {
                     currentLevel = parseInt(localStorage.getItem('mf_Lvl_v13'), 10);
@@ -1218,25 +1216,6 @@
                 }
             }
 
-            function createGhostTrail(block, blockEl) {
-                let rect = blockEl.getBoundingClientRect();
-                let ghost = document.createElement('div');
-                ghost.className = 'ghost-trail';
-                ghost.style.left = rect.left + 'px';
-                ghost.style.top = rect.top + 'px';
-                ghost.style.width = rect.width + 'px';
-                ghost.style.height = rect.height + 'px';
-                ghost.style.backgroundColor = block.color;
-                ghost.style.boxShadow = `0 0 20px ${block.color}`;
-                document.body.appendChild(ghost);
-                
-                requestAnimationFrame(() => {
-                    ghost.style.opacity = '0';
-                    ghost.style.transform = 'scale(0.3)';
-                });
-                setTimeout(() => ghost.remove(), 400);
-            }
-
             function initLevel(mode = 'NEXT') {
                 if (mode === 'NEW_GAME') {
                     lives = 3; currentLevel = 1; score = 0; accumulatedTimeMs = 0; 
@@ -1340,18 +1319,41 @@
                     let moveX = DIRS[block.dir].x * distance;
                     let moveY = DIRS[block.dir].y * distance;
                     
-                    // Trail animation
-                    let trailInterval = setInterval(() => {
-                        if(!isGameActive && blocksRemaining !== 0) { clearInterval(trailInterval); return; }
-                        createGhostTrail(block, blockEl);
-                    }, 40);
+                    // Cria os fantasmas com CSS Delay
+                    const numGhosts = 4;
+                    for (let i = 1; i <= numGhosts; i++) {
+                        let ghost = document.createElement('div');
+                        ghost.className = `block dir-${block.dir} flying ghost-trail`;
+                        ghost.style.left = blockEl.style.left;
+                        ghost.style.top = blockEl.style.top;
+                        ghost.style.width = blockEl.style.width;
+                        ghost.style.height = blockEl.style.height;
+                        ghost.style.backgroundColor = block.color;
+                        ghost.style.boxShadow = `0 0 20px ${block.color}`;
+                        ghost.style.zIndex = 90 - i;
+                        ghost.innerHTML = blockEl.innerHTML;
+                        
+                        ghost.style.opacity = 1 - (i * 0.2); 
+                        
+                        boardEl.appendChild(ghost);
+                        void ghost.offsetWidth; // Força reflow
+                        
+                        let delay = i * 0.04; 
+                        ghost.style.transition = `transform 0.4s cubic-bezier(0.4, 0, 1, 1) ${delay}s, opacity 0.3s ease-in ${delay + 0.1}s`;
+                        ghost.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                        ghost.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+                        }, 600 + (delay * 1000));
+                    }
 
                     blockEl.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease-in 0.1s';
                     blockEl.style.transform = `translate(${moveX}px, ${moveY}px)`;
                     blockEl.style.opacity = '0';
+                    blockEl.style.boxShadow = `0 0 30px ${block.color}, inset 0 0 10px rgba(255,255,255,0.8)`;
 
                     setTimeout(() => {
-                        clearInterval(trailInterval);
                         if (blockEl.parentNode) blockEl.parentNode.removeChild(blockEl);
                         if (blocksRemaining === 0 && isGameActive) handleVictory();
                     }, 400);
